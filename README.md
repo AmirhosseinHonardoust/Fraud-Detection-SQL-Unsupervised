@@ -146,4 +146,4 @@ python src/detect_fraud_unsupervised.py --db fraud.db --sql src/queries.sql --ou
 ## Conclusion
 
 This project showcases a complete unsupervised anomaly detection pipeline.  
-It demonstrates how **SQL + Python** can work together to identify rare or irregular financial behaviors — a foundation for fraud prevention and risk analysis systems.
+It demonstrates how **SQL + Python** can work together to identify rare or irregular financial behaviors, a foundation for fraud prevention and risk analysis systems.
