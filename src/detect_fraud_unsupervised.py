@@ -36,6 +36,17 @@ def run_analysis(db_path: str | Path, sql_path: str | Path, outdir: str | Path) 
 
     # Features for anomaly detection
     feature_cols = ["amount", "tx_count", "avg_amount", "total_amount", "daily_tx", "daily_amount"]
+    
+    # Validate that all required feature columns exist in the query result
+    missing_cols = [col for col in feature_cols if col not in df.columns]
+    if missing_cols:
+        available_cols = sorted(df.columns.tolist())
+        raise ValueError(
+            f"SQL query is missing required feature columns: {missing_cols}. "
+            f"Available columns: {available_cols}. "
+            f"Please ensure your SQL query returns all required columns: {feature_cols}"
+        )
+    
     X = df[feature_cols].fillna(0)
 
     # Isolation Forest (unsupervised)
