@@ -1,5 +1,5 @@
 # Fraud Detection  [SQL + Python (Unsupervised)]
-    
+      
 Detect potentially fraudulent bank transactions using **SQL (SQLite)** for feature engineering and **Python** for unsupervised anomaly detection with Isolation Forest.
 
 ---
