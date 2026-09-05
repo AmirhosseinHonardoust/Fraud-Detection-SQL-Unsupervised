@@ -136,9 +136,12 @@ python src/create_db.py --csv data/transactions.csv --db fraud.db
 python src/detect_fraud_unsupervised.py --db fraud.db --sql src/queries.sql --outdir outputs
 ```
 
-Optional flags let you tune the Isolation Forest without editing code:
-`--contamination` (expected anomaly proportion, default `0.02`) and
-`--random-state` (seed, default `7`).
+Optional flags let you tune the pipeline without editing code:
+`--contamination` (expected anomaly proportion, default `0.02`),
+`--random-state` (seed, default `7`), and `--feature-cols` (comma-separated
+list of columns from the SQL result to feed the Isolation Forest, default is
+the six columns produced by `src/queries.sql`), e.g.
+`--feature-cols amount,tx_count`.
 
 ---
 
@@ -186,6 +189,21 @@ or run any step on its own (`make lint`, `make format-check`, `make typecheck`,
 `charts/fraud_distribution.png` locally.
 
 ---
+
+## Limitations
+
+This is a learning/portfolio project, not a production fraud system:
+
+- `data/transactions.csv` is a single synthetic dataset committed to the repo
+  (~3 MB); there's no ingestion pipeline for live or streaming transactions.
+- `src/queries.sql`'s final statement is assumed to be the feature-producing
+  `SELECT`; everything before it is treated as setup DDL (e.g. `CREATE VIEW`).
+  There's no validation that the file actually follows this convention beyond
+  checking it isn't empty.
+- Isolation Forest is unsupervised: without labeled fraud data there's no
+  precision/recall to report, only a relative anomaly ranking.
+- Contamination and feature columns are the only tunables; there's no config
+  file or hyperparameter search.
 
 ## Conclusion
 

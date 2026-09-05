@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.utils import ensure_outdir, plot_hist, save_csv
+from src.utils import ensure_outdir, plot_hist, save_csv, split_sql_statements
 
 
 def test_ensure_outdir_creates_nested_dirs(tmp_path: Path) -> None:
@@ -50,3 +50,33 @@ def test_plot_hist_creates_png(tmp_path: Path) -> None:
     assert result == out_path
     assert out_path.exists()
     assert out_path.stat().st_size > 0
+
+
+def test_split_sql_statements_basic() -> None:
+    sql = "SELECT 1; SELECT 2;\nSELECT 3"
+    assert split_sql_statements(sql) == ["SELECT 1", "SELECT 2", "SELECT 3"]
+
+
+def test_split_sql_statements_ignores_semicolon_in_single_quoted_string() -> None:
+    sql = "SELECT 'a;b' AS x; SELECT 2"
+    assert split_sql_statements(sql) == ["SELECT 'a;b' AS x", "SELECT 2"]
+
+
+def test_split_sql_statements_ignores_semicolon_in_double_quoted_identifier() -> None:
+    sql = 'SELECT "col;name" FROM t; SELECT 2'
+    assert split_sql_statements(sql) == ['SELECT "col;name" FROM t', "SELECT 2"]
+
+
+def test_split_sql_statements_handles_escaped_quote() -> None:
+    # '' inside a single-quoted string is a literal escaped quote, not a closer.
+    sql = "SELECT 'it''s; fine' AS x; SELECT 2"
+    assert split_sql_statements(sql) == ["SELECT 'it''s; fine' AS x", "SELECT 2"]
+
+
+def test_split_sql_statements_drops_blank_statements() -> None:
+    sql = ";;SELECT 1;;  ;SELECT 2;"
+    assert split_sql_statements(sql) == ["SELECT 1", "SELECT 2"]
+
+
+def test_split_sql_statements_empty_input_returns_empty_list() -> None:
+    assert split_sql_statements("   ") == []

@@ -18,10 +18,10 @@ from sklearn.ensemble import IsolationForest
 try:
     # Direct execution (``python src/detect_fraud_unsupervised.py``, as documented
     # in the README): the script's own directory is on sys.path, so this works.
-    from utils import ensure_outdir, plot_hist, save_csv
+    from utils import ensure_outdir, plot_hist, save_csv, split_sql_statements
 except ImportError:
     # Imported as part of the ``src`` package (e.g. from tests).
-    from src.utils import ensure_outdir, plot_hist, save_csv
+    from src.utils import ensure_outdir, plot_hist, save_csv, split_sql_statements
 
 DEFAULT_FEATURE_COLS = [
     "amount",
@@ -75,10 +75,11 @@ def run_analysis(
     outdir = ensure_outdir(outdir)
     charts_dir = ensure_outdir(Path(outdir) / "charts")
 
-    # Read the SQL file and split into statements.
+    # Read the SQL file and split into statements (quote-aware: semicolons inside
+    # string/identifier literals do not split a statement).
     with open(sql_path, encoding="utf-8") as f:
         sql_text = f.read()
-    statements = [s.strip() for s in sql_text.split(";") if s.strip()]
+    statements = split_sql_statements(sql_text)
     if not statements:
         raise RuntimeError("No SQL statements found in the provided file.")
 
@@ -150,6 +151,16 @@ def parse_args() -> argparse.Namespace:
     )
     ap.add_argument("--outdir", default="outputs", help="Output directory")
     ap.add_argument(
+        "--feature-cols",
+        default=None,
+        help=(
+            "Comma-separated list of columns from the SQL result to use as "
+            "Isolation Forest input features. Defaults to the columns produced "
+            "by the bundled src/queries.sql "
+            f"({','.join(DEFAULT_FEATURE_COLS)})."
+        ),
+    )
+    ap.add_argument(
         "--contamination",
         type=float,
         default=0.02,
@@ -166,11 +177,17 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    feature_cols = (
+        [c.strip() for c in args.feature_cols.split(",") if c.strip()]
+        if args.feature_cols
+        else None
+    )
     try:
         run_analysis(
             args.db,
             args.sql,
             args.outdir,
+            feature_cols=feature_cols,
             contamination=args.contamination,
             random_state=args.random_state,
         )
