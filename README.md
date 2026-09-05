@@ -154,6 +154,9 @@ Install dev dependencies (linting, formatting, type checking, tests):
 pip install -r requirements-dev.txt
 ```
 
+For an exact reproducible environment (pinned transitive dependencies too),
+use `requirements-lock.txt` instead of `requirements.txt`.
+
 Run the full quality gate locally, the same checks CI runs on every push/PR:
 
 ```bash
@@ -163,9 +166,9 @@ mypy src
 pytest
 ```
 
-The files under `outputs/` are a committed reference sample so you can browse
-results without running the pipeline. Regenerate them with the two commands
-in [Usage](#usage) after any change to the pipeline logic.
+`outputs/` is generated, not committed — run the two commands in
+[Usage](#usage) to produce `fraud_scores.csv`, `fraud_summary.csv`, and
+`charts/fraud_distribution.png` locally.
 
 ---
 

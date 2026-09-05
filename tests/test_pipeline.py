@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import subprocess
 import sys
 from pathlib import Path
 
@@ -15,6 +16,8 @@ from detect_fraud_unsupervised import run_analysis  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 QUERIES_SQL = REPO_ROOT / "src" / "queries.sql"
+CREATE_DB_SCRIPT = REPO_ROOT / "src" / "create_db.py"
+DETECT_FRAUD_SCRIPT = REPO_ROOT / "src" / "detect_fraud_unsupervised.py"
 
 
 def _make_synthetic_csv(path: Path, n_rows: int = 200, seed: int = 0) -> Path:
@@ -110,3 +113,60 @@ def test_run_analysis_rejects_unknown_feature_column(tmp_path: Path) -> None:
             tmp_path / "outputs",
             feature_cols=["amount", "not_a_real_column"],
         )
+
+
+def test_create_db_cli_missing_csv_exits_cleanly(tmp_path: Path) -> None:
+    result = subprocess.run(
+        [sys.executable, str(CREATE_DB_SCRIPT), "--csv", "does_not_exist.csv", "--db", "x.db"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 1
+    assert "Traceback" not in result.stderr
+    assert "Error:" in result.stderr
+
+
+def test_detect_fraud_cli_missing_db_exits_cleanly(tmp_path: Path) -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(DETECT_FRAUD_SCRIPT),
+            "--db",
+            "missing.db",
+            "--sql",
+            str(QUERIES_SQL),
+            "--outdir",
+            str(tmp_path / "outputs"),
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 1
+    assert "Traceback" not in result.stderr
+    assert "Error:" in result.stderr
+
+
+def test_detect_fraud_cli_missing_sql_exits_cleanly(tmp_path: Path) -> None:
+    csv_path = _make_synthetic_csv(tmp_path / "transactions.csv")
+    db_path = load_csv_to_db(csv_path, tmp_path / "fraud.db")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(DETECT_FRAUD_SCRIPT),
+            "--db",
+            str(db_path),
+            "--sql",
+            "missing.sql",
+            "--outdir",
+            str(tmp_path / "outputs"),
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 1
+    assert "Traceback" not in result.stderr
+    assert "Error:" in result.stderr
