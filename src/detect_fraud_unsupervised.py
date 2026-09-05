@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import sqlite3
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -141,7 +142,11 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    run_analysis(args.db, args.sql, args.outdir)
+    try:
+        run_analysis(args.db, args.sql, args.outdir)
+    except (FileNotFoundError, RuntimeError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
