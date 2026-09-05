@@ -160,10 +160,18 @@ Install dev dependencies (linting, formatting, type checking, tests):
 pip install -r requirements-dev.txt
 ```
 
+`src/` is also an installable package (useful if you want `import src...` to
+work from outside the repo, e.g. in a notebook):
+
+```bash
+pip install -e .
+```
+
 For an exact reproducible environment (pinned transitive dependencies too),
 use `requirements-lock.txt` instead of `requirements.txt`.
 
-Run the full quality gate locally, the same checks CI runs on every push/PR:
+Run the full quality gate locally, the same checks CI runs on every push/PR
+(CI runs this on both Python 3.11 and 3.12):
 
 ```bash
 make gate       # lint + format-check + typecheck + test

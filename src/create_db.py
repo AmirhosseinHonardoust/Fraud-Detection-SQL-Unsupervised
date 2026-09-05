@@ -14,11 +14,6 @@ from pathlib import Path
 
 import pandas as pd
 
-CREATE_TABLE_SQL = (
-    "CREATE TABLE IF NOT EXISTS transactions ("
-    "tx_id INTEGER, user_id TEXT, date TEXT, region TEXT, merchant TEXT, amount REAL)"
-)
-
 
 def load_csv_to_db(csv_path: str | Path, db_path: str | Path) -> Path:
     """Load ``csv_path`` into the ``transactions`` table of ``db_path``.
@@ -33,9 +28,10 @@ def load_csv_to_db(csv_path: str | Path, db_path: str | Path) -> Path:
     df = pd.read_csv(csv_path)
 
     with sqlite3.connect(db_path) as con:
-        con.execute(CREATE_TABLE_SQL)
-        # if_exists="replace" drops and recreates the table, so indexes must be
-        # (re)created afterwards, not before.
+        # if_exists="replace" drops and recreates the table using the schema
+        # pandas infers from df, so there's no need to CREATE TABLE first —
+        # any upfront schema would just be dropped again here. Indexes must
+        # be (re)created afterwards for the same reason.
         df.to_sql("transactions", con, if_exists="replace", index=False)
         con.execute("CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions (user_id)")
         con.execute(
