@@ -15,7 +15,13 @@ from pathlib import Path
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 
-from utils import ensure_outdir, plot_hist, save_csv
+try:
+    # Direct execution (``python src/detect_fraud_unsupervised.py``, as documented
+    # in the README): the script's own directory is on sys.path, so this works.
+    from utils import ensure_outdir, plot_hist, save_csv
+except ImportError:
+    # Imported as part of the ``src`` package (e.g. from tests).
+    from src.utils import ensure_outdir, plot_hist, save_csv
 
 DEFAULT_FEATURE_COLS = [
     "amount",
@@ -32,6 +38,8 @@ def run_analysis(
     sql_path: str | Path,
     outdir: str | Path,
     feature_cols: list[str] | None = None,
+    contamination: float = 0.02,
+    random_state: int = 7,
 ) -> None:
     """Run the SQL feature engineering + Isolation Forest pipeline.
 
@@ -45,6 +53,10 @@ def run_analysis(
         feature_cols: Columns used as Isolation Forest input features. Defaults
             to ``DEFAULT_FEATURE_COLS``, which matches the columns produced by
             the bundled ``src/queries.sql``.
+        contamination: Expected proportion of anomalies, passed to
+            ``IsolationForest``. Defaults to 0.02 (~2% anomalies).
+        random_state: Random seed passed to ``IsolationForest``. Defaults to 7;
+            fixing it keeps the pipeline deterministic across runs.
 
     Raises:
         FileNotFoundError: If ``db_path`` or ``sql_path`` do not exist.
@@ -92,8 +104,8 @@ def run_analysis(
     # Isolation Forest (unsupervised)
     model = IsolationForest(
         n_estimators=200,
-        contamination=0.02,  # ~2% anomalies
-        random_state=7,
+        contamination=contamination,
+        random_state=random_state,
     )
     # decision_function: higher = more normal. Convert to [0,1] anomaly score,
     # where higher = more anomalous, via min-max normalization.
@@ -137,13 +149,31 @@ def parse_args() -> argparse.Namespace:
         "--sql", default="src/queries.sql", help="Path to SQL file (feature engineering)"
     )
     ap.add_argument("--outdir", default="outputs", help="Output directory")
+    ap.add_argument(
+        "--contamination",
+        type=float,
+        default=0.02,
+        help="Expected proportion of anomalies (IsolationForest contamination). Default: 0.02",
+    )
+    ap.add_argument(
+        "--random-state",
+        type=int,
+        default=7,
+        help="Random seed for IsolationForest, for reproducible results. Default: 7",
+    )
     return ap.parse_args()
 
 
 def main() -> None:
     args = parse_args()
     try:
-        run_analysis(args.db, args.sql, args.outdir)
+        run_analysis(
+            args.db,
+            args.sql,
+            args.outdir,
+            contamination=args.contamination,
+            random_state=args.random_state,
+        )
     except (FileNotFoundError, RuntimeError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         sys.exit(1)

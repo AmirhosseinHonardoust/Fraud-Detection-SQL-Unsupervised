@@ -34,7 +34,14 @@ def load_csv_to_db(csv_path: str | Path, db_path: str | Path) -> Path:
 
     with sqlite3.connect(db_path) as con:
         con.execute(CREATE_TABLE_SQL)
+        # if_exists="replace" drops and recreates the table, so indexes must be
+        # (re)created afterwards, not before.
         df.to_sql("transactions", con, if_exists="replace", index=False)
+        con.execute("CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions (user_id)")
+        con.execute(
+            "CREATE INDEX IF NOT EXISTS idx_transactions_user_date "
+            "ON transactions (user_id, date)"
+        )
 
     return db_path
 

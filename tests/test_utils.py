@@ -2,14 +2,11 @@
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
-from utils import ensure_outdir, plot_hist, save_csv  # noqa: E402
+from src.utils import ensure_outdir, plot_hist, save_csv
 
 
 def test_ensure_outdir_creates_nested_dirs(tmp_path: Path) -> None:

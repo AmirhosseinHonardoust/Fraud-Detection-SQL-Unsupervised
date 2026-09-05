@@ -9,10 +9,8 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
-from create_db import load_csv_to_db  # noqa: E402
-from detect_fraud_unsupervised import run_analysis  # noqa: E402
+from src.create_db import load_csv_to_db
+from src.detect_fraud_unsupervised import run_analysis
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 QUERIES_SQL = REPO_ROOT / "src" / "queries.sql"
