@@ -1,3 +1,6 @@
 pandas>=2.0,<3.0
 matplotlib>=3.7,<4.0
 scikit-learn>=1.3,<2.0
+# numpy>=2.3 dropped Python 3.11 wheels; CI and mypy both target 3.11 (see
+# pyproject.toml), so pin the last version that still ships one.
+numpy>=1.24,<2.3

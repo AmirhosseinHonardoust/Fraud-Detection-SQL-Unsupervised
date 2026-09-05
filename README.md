@@ -67,6 +67,8 @@ fraud-detection-sql-unsupervised/
 
 Feature generation is handled by `src/queries.sql`.  
 It builds temporary SQL views to calculate user statistics and daily activity.
+Reformatted here for readability (implicit column aliases in the file, e.g.
+`COUNT(*) tx_count`, are spelled out with `AS` below); the logic is identical:
 
 ```sql
 CREATE TEMP VIEW user_stats AS
@@ -134,6 +136,10 @@ python src/create_db.py --csv data/transactions.csv --db fraud.db
 python src/detect_fraud_unsupervised.py --db fraud.db --sql src/queries.sql --outdir outputs
 ```
 
+Optional flags let you tune the Isolation Forest without editing code:
+`--contamination` (expected anomaly proportion, default `0.02`) and
+`--random-state` (seed, default `7`).
+
 ---
 
 ## Outputs
@@ -160,11 +166,12 @@ use `requirements-lock.txt` instead of `requirements.txt`.
 Run the full quality gate locally, the same checks CI runs on every push/PR:
 
 ```bash
-ruff check src tests
-black --check src tests
-mypy src
-pytest
+make gate       # lint + format-check + typecheck + test
 ```
+
+or run any step on its own (`make lint`, `make format-check`, `make typecheck`,
+`make test`) — see the `Makefile` for the exact commands, which are also what
+`.github/workflows/ci.yml` runs.
 
 `outputs/` is generated, not committed — run the two commands in
 [Usage](#usage) to produce `fraud_scores.csv`, `fraud_summary.csv`, and
