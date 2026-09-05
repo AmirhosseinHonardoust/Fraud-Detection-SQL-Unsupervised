@@ -21,6 +21,9 @@ htmlcov/
 *.sqlite
 *.sqlite3
 
+# Generated pipeline artifacts (regenerate via the two Usage commands in README)
+/outputs/
+
 # OS cruft
 .DS_Store
 
