@@ -31,7 +31,7 @@ jobs:
         run: black --check src tests
 
       - name: Type check (mypy)
-        run: mypy src
+        run: mypy src tests
 
-      - name: Run tests
-        run: pytest
+      - name: Run tests with coverage
+        run: pytest --cov=src --cov-report=term-missing

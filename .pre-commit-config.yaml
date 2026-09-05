@@ -1,0 +1,27 @@
+# Runs the same tools/versions as requirements-dev.txt and CI, via the
+# project's own virtualenv (language: system) rather than pre-commit's
+# isolated hook environments, so there is exactly one place the version
+# pins live. Install with: pip install -r requirements-dev.txt && pre-commit install
+repos:
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff
+        entry: ruff check
+        language: system
+        types: [python]
+        require_serial: true
+
+      - id: black
+        name: black
+        entry: black
+        language: system
+        types: [python]
+
+      - id: mypy
+        name: mypy
+        entry: mypy src tests
+        language: system
+        types: [python]
+        files: ^(src|tests)/
+        pass_filenames: false
