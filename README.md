@@ -1,5 +1,8 @@
 # Fraud Detection  [SQL + Python (Unsupervised)]
-                 
+
+[![CI](https://github.com/AmirhosseinHonardoust/Fraud-Detection-SQL-Unsupervised/actions/workflows/ci.yml/badge.svg)](https://github.com/AmirhosseinHonardoust/Fraud-Detection-SQL-Unsupervised/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Detect potentially fraudulent bank transactions using **SQL (SQLite)** for feature engineering and **Python** for unsupervised anomaly detection with Isolation Forest.
 
 ---
@@ -140,6 +143,29 @@ python src/detect_fraud_unsupervised.py --db fraud.db --sql src/queries.sql --ou
 | `fraud_scores.csv` | Ranked transactions with anomaly scores |
 | `fraud_summary.csv` | User-level fraud summary |
 | `fraud_distribution.png` | Histogram of anomaly scores |
+
+---
+
+## Development
+
+Install dev dependencies (linting, formatting, type checking, tests):
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+Run the full quality gate locally, the same checks CI runs on every push/PR:
+
+```bash
+ruff check src tests
+black --check src tests
+mypy src
+pytest
+```
+
+The files under `outputs/` are a committed reference sample so you can browse
+results without running the pipeline. Regenerate them with the two commands
+in [Usage](#usage) after any change to the pipeline logic.
 
 ---
 
