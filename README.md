@@ -1,6 +1,7 @@
 <div align="center">
 
 # Fraud Detection, SQL + Unsupervised ML
+<img width="1774" height="887" alt="Fraud-Detection-SQL-Unsupervised" src="https://github.com/user-attachments/assets/ed639877-42e3-4e9b-8522-43479132a0c9" />
 
 ![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-Isolation%20Forest-orange)
